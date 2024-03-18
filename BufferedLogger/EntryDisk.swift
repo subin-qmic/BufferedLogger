@@ -25,11 +25,18 @@ public final class EntryDisk: EntryStorage {
         guard try exist(for: path) else {
             return []
         }
-
-        let data = try read(from: path)
-        let decorder = PropertyListDecoder()
-        let logs = try decorder.decode([Entry].self, from: data)
-        return Set<Entry>(logs)
+        
+        do {
+            let data = try read(from: path)
+            if data.isEmpty {
+                return []
+            }
+            let decoder = PropertyListDecoder()
+            let logs = try decoder.decode([Entry].self, from: data)
+            return Set<Entry>(logs)
+        } catch let error as NSError {
+            return []
+        }
     }
 
     public func save(_ log: Entry, to path: String) throws {
